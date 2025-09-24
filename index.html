@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketly - Tech Layoffs Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        .predictive-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-left: 4px solid #d32f2f;
+        }
+        .predictive-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .predictive-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 3px solid #2196F3;
+        }
+        .predictive-company {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .predictive-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        .predictive-risk {
+            background: #d32f2f;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .predictive-risk.medium {
+            background: #ff9800;
+        }
+        .predictive-timeline {
+            background: #666;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        .predictive-reason {
+            color: #666;
+            font-style: italic;
+        }
+        .admin-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+        .admin-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .admin-btn:hover {
+            background: #b71c1c;
+        }
+        .admin-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .admin-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .admin-form {
+            margin-top: 20px;
+        }
+        .admin-form input, .admin-form select, .admin-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .admin-form textarea {
+            height: 60px;
+            resize: vertical;
+        }
+        .admin-form button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .admin-form button:hover {
+            background: #b71c1c;
+        }
+        .admin-form .cancel-btn {
+            background: #666;
+        }
+        .admin-form .cancel-btn:hover {
+            background: #555;
+        }
+        .admin-predictions-list {
+            margin-top: 20px;
+        }
+        .admin-prediction-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-prediction-info {
+            flex-grow: 1;
+        }
+        .admin-prediction-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .admin-prediction-actions button {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+        .edit-btn {
+            background: #2196F3 !important;
+        }
+        .edit-btn:hover {
+            background: #1976D2 !important;
+        }
+        .delete-btn {
+            background: #d32f2f !important;
+        }
+        .delete-btn:hover {
+            background: #b71c1c !important;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .tracker-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background-color: #e9ecef;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .company-name {
+            font-weight: 600;
+        }
+        .layoff-number {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .percentage {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .date {
+            color: #666;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+        .clear-filters {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .clear-filters:hover {
+            background: #5a6268;
+        }
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .stats-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Marketly</h1>
+        <h2 style="margin-top: 10px; color: #666; font-weight: normal;">Tech Layoffs Tracker</h2>
+        <button id="adminBtn" class="admin-btn" onclick="showAdminLogin()">Admin Login</button>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-number" id="totalLayoffs">23,054</div>
+            <div class="stat-label">Tech Employees Laid Off</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="totalCompanies">87</div>
+            <div class="stat-label">Companies with Layoffs</div>
+        </div>
+    </div>
+
+    <!-- Predictive Section -->
+    <div class="predictive-section">
+        <h3 style="color: #d32f2f; margin-bottom: 15px;">🔮 Predictive Layoffs & Closures</h3>
+        <div class="predictive-content">
+            <p style="color: #666; font-style: italic; margin-bottom: 20px;">
+                This section is manually curated by our admin team. For updates, contact:
+                <a href="mailto:dana@added-value.co.il" style="color: #d32f2f;">dana@added-value.co.il</a>
+            </p>
+
+            <div class="predictive-cards">
+                <div class="predictive-card">
+                    <div class="predictive-company">TBD Company</div>
+                    <div class="predictive-details">
+                        <span class="predictive-risk">High Risk</span>
+                        <span class="predictive-timeline">Q4 2025</span>
+                    </div>
+                    <div class="predictive-reason">Market conditions and funding challenges</div>
+                </div>
+
+                <div class="predictive-card">
+                    <div class="predictive-company">Example Corp</div>
+                    <div class="predictive-details">
+                        <span class="predictive-risk medium">Medium Risk</span>
+                        <span class="predictive-timeline">Q1 2026</span>
+                    </div>
+                    <div class="predictive-reason">Industry consolidation expected</div>
+                </div>
+
+                <div class="admin-note">
+                    <strong>Admin Note:</strong> This section will be updated manually as new intelligence becomes available.
+                    Predictions are based on market analysis and should be considered speculative.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search companies, industries, or locations...">
+        </div>
+        <div class="filter-group">
+            <label for="monthFilter">Month:</label>
+            <select id="monthFilter">
+                <option value="">All Months</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="industryFilter">Industry:</label>
+            <select id="industryFilter">
+                <option value="">All Industries</option>
+                <option value="Semiconductors">Semiconductors</option>
+                <option value="Software">Software</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Enterprise Software">Enterprise Software</option>
+                <option value="CRM Software">CRM Software</option>
+                <option value="Networking">Networking</option>
+                <option value="Database Software">Database Software</option>
+                <option value="AI/ML">AI/ML</option>
+                <option value="Fintech">Fintech</option>
+                <option value="HealthTech">HealthTech</option>
+                <option value="E-commerce Marketing">E-commerce Marketing</option>
+                <option value="Freelance Platform">Freelance Platform</option>
+                <option value="Video Technology">Video Technology</option>
+                <option value="Industrial IoT">Industrial IoT</option>
+                <option value="Telecom Software">Telecom Software</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="locationFilter">Location:</label>
+            <select id="locationFilter">
+                <option value="">All Locations</option>
+                <option value="Global">Global</option>
+                <option value="California">California</option>
+                <option value="Texas">Texas</option>
+                <option value="Israel">Israel</option>
+            </select>
+        </div>
+        <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="tracker-table">
+        <table id="layoffsTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Company ↕</th>
+                    <th onclick="sortTable(1)">Layoffs ↕</th>
+                    <th onclick="sortTable(2)">Percentage ↕</th>
+                    <th onclick="sortTable(3)">Date ↕</th>
+                    <th onclick="sortTable(4)">Industry ↕</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will be populated dynamically -->
+            </tbody>
+        </table>
+        <div id="noResults" class="no-results" style="display: none;">
+            No layoffs found matching your criteria.
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="admin-modal">
+        <div class="admin-content">
+            <h3>Admin Login</h3>
+            <div id="loginForm">
+                <input type="email" id="adminEmail" placeholder="Admin Email" required>
+                <input type="password" id="adminPassword" placeholder="Password" required>
+                <button onclick="adminLogin()">Login</button>
+                <button class="cancel-btn" onclick="closeAdminModal()">Cancel</button>
+            </div>
+
+            <div id="adminPanel" style="display: none;">
+                <h3>Admin Panel - Predictive Layoffs & Closures</h3>
+
+                <div class="admin-form">
+                    <h4>Add New Prediction</h4>
+                    <input type="text" id="newCompany" placeholder="Company Name" required>
+                    <select id="newRisk" required>
+                        <option value="">Select Risk Level</option>
+                        <option value="high">High Risk</option>
+                        <option value="medium">Medium Risk</option>
+                        <option value="low">Low Risk</option>
+                    </select>
+                    <input type="text" id="newTimeline" placeholder="Timeline (e.g., Q4 2025)" required>
+                    <textarea id="newReason" placeholder="Reason for prediction" required></textarea>
+                    <button onclick="addPrediction()">Add Prediction</button>
+                </div>
+
+                <div class="admin-predictions-list">
+                    <h4>Current Predictions</h4>
+                    <div id="adminPredictionsList">
+                        <!-- Predictions will be loaded here -->
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button onclick="savePredictions()">Save All Changes</button>
+                    <button class="cancel-btn" onclick="adminLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Embedded layoffs data (updated 2025-09-24)
+        const layoffsDataSource = {
+            "lastUpdated": "2025-09-24",
+            "totalLayoffs": 96861,
+            "totalCompanies": 413,
+            "layoffs": [
+                {"company": "Intel", "layoffs": 24000, "percentage": "~24%", "date": "2025-07-15", "month": "July", "industry": "Semiconductors", "location": "Global (2,400 in Oregon)", "source": "CEO Lip-Bu Tan announcement"},
+                {"company": "Microsoft", "layoffs": 15000, "percentage": "~4%", "date": "2025-07-01", "month": "July", "industry": "Software", "location": "Global", "source": "Company restructuring"},
+                {"company": "Meta", "layoffs": 3600, "percentage": "5%", "date": "2025-01-15", "month": "January", "industry": "Social Media", "location": "Global (100+ in Reality Labs)", "source": "Reality Labs restructuring"},
+                {"company": "Google", "layoffs": 1000, "percentage": "~1%", "date": "2025-08-01", "month": "August", "industry": "Software", "location": "Global (25% of TV division)", "source": "Platforms and devices restructuring"},
+                {"company": "Amazon", "layoffs": 2500, "percentage": "~1%", "date": "2025-06-15", "month": "June", "industry": "E-commerce/Cloud", "location": "Global (AWS, Twitch, Ads)", "source": "Multiple division cuts"},
+                {"company": "IBM", "layoffs": 3000, "percentage": "~3%", "date": "2025-05-01", "month": "May", "industry": "Enterprise Software", "location": "Global", "source": "AI transformation strategy"},
+                {"company": "PwC", "layoffs": 1800, "percentage": "~2%", "date": "2025-04-20", "month": "April", "industry": "Consulting", "location": "United States", "source": "Business restructuring"},
+                {"company": "Chegg", "layoffs": 441, "percentage": "~23%", "date": "2025-06-10", "month": "June", "industry": "EdTech", "location": "Global", "source": "AI impact on business model"},
+                {"company": "Twitch", "layoffs": 500, "percentage": "~35%", "date": "2025-01-10", "month": "January", "industry": "Streaming Platform", "location": "Global", "source": "Cost reduction measures"},
+                {"company": "Discord", "layoffs": 170, "percentage": "~17%", "date": "2025-01-11", "month": "January", "industry": "Communication Platform", "location": "Global", "source": "Operational efficiency"},
+                {"company": "Duolingo", "layoffs": 250, "percentage": "~10%", "date": "2025-03-15", "month": "March", "industry": "EdTech", "location": "Global", "source": "AI automation of content creation"},
+                {"company": "Snap Inc.", "layoffs": 528, "percentage": "~10%", "date": "2025-02-28", "month": "February", "industry": "Social Media", "location": "Global", "source": "Restructuring efforts"},
+                {"company": "Unity", "layoffs": 1800, "percentage": "~25%", "date": "2025-01-08", "month": "January", "industry": "Gaming/Software", "location": "Global", "source": "Company reset strategy"},
+                {"company": "eBay", "layoffs": 1000, "percentage": "~9%", "date": "2025-01-24", "month": "January", "industry": "E-commerce", "location": "Global", "source": "Organizational changes"},
+                {"company": "PayPal", "layoffs": 2500, "percentage": "~9%", "date": "2025-01-31", "month": "January", "industry": "Fintech", "location": "Global", "source": "Strategic realignment"},
+                {"company": "Fiverr", "layoffs": 250, "percentage": "~15%", "date": "2025-09-15", "month": "September", "industry": "Freelance Platform", "location": "Israel (Tel Aviv)", "source": "AI-first strategy shift"},
+                {"company": "ZipRecruiter", "layoffs": 80, "percentage": "~5%", "date": "2025-09-16", "month": "September", "industry": "Recruitment Tech", "location": "Israel", "source": "Rising costs amid challenging markets"},
+                {"company": "Yotpo", "layoffs": 200, "percentage": "34%", "date": "2025-08-05", "month": "August", "industry": "E-commerce Marketing", "location": "Israel (Tel Aviv)", "source": "Cost optimization"},
+                {"company": "Intel Israel", "layoffs": 1800, "percentage": "~20%", "date": "2025-07-07", "month": "July", "industry": "Semiconductors", "location": "Israel (Kiryat Gat, Haifa)", "source": "Global restructuring plan"},
+                {"company": "Amdocs", "layoffs": 500, "percentage": "~5%", "date": "2025-08-11", "month": "August", "industry": "Telecom Software", "location": "Israel (Ra'anana)", "source": "GenAI & Data unit launch"},
+                {"company": "Kaltura", "layoffs": 120, "percentage": "10%", "date": "2025-08-07", "month": "August", "industry": "Video Technology", "location": "Israel (New York)", "source": "Operational efficiency"},
+                {"company": "TytoCare", "layoffs": 60, "percentage": "20%", "date": "2025-07-17", "month": "July", "industry": "HealthTech", "location": "Israel (Netanya)", "source": "Cash flow optimization"},
+                {"company": "Augury", "layoffs": 45, "percentage": "18%", "date": "2025-07-10", "month": "July", "industry": "Industrial IoT", "location": "Israel (Ramat Gan)", "source": "Market focus adjustment"},
+                {"company": "Nayax", "layoffs": 70, "percentage": "~12%", "date": "2025-07-07", "month": "July", "industry": "Payment Solutions", "location": "Israel (Herzliya)", "source": "Business optimization"},
+                {"company": "Verbit", "layoffs": 22, "percentage": "~8%", "date": "2025-09-10", "month": "September", "industry": "AI Transcription", "location": "Israel (Tel Aviv)", "source": "Third round of layoffs"},
+                {"company": "Tipalti", "layoffs": 50, "percentage": "~5%", "date": "2025-07-24", "month": "July", "industry": "Accounts Payable", "location": "Israel (Glil Yam)", "source": "Cost management"},
+                {"company": "Riskified", "layoffs": 40, "percentage": "6%", "date": "2025-05-15", "month": "May", "industry": "Fintech/Fraud Prevention", "location": "Israel (Tel Aviv)", "source": "EBITDA target acceleration"}
+            ]
+        };
+
+        let layoffsData = layoffsDataSource.layoffs;
+
+        // Initialize data
+        function loadData() {
+            // Update stats
+            document.getElementById('totalLayoffs').textContent = layoffsDataSource.totalLayoffs.toLocaleString();
+            document.getElementById('totalCompanies').textContent = layoffsDataSource.totalCompanies.toLocaleString();
+
+            // Update last updated info
+            const lastUpdated = document.createElement('p');
+            lastUpdated.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
+            lastUpdated.style.textAlign = 'center';
+            lastUpdated.style.color = '#666';
+            lastUpdated.style.fontSize = '0.9em';
+            document.querySelector('.header').appendChild(lastUpdated);
+
+            // Populate table with data
+            populateTable();
+        }
+
+        function populateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            layoffsData.forEach(layoff => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td class="company-name">${layoff.company}</td>
+                    <td class="layoff-number">${layoff.layoffs.toLocaleString()}</td>
+                    <td class="percentage">${layoff.percentage}</td>
+                    <td class="date" data-month="${layoff.month}">${layoff.month} 2025</td>
+                    <td>${layoff.industry}</td>
+                    <td>${layoff.location}</td>
+                `;
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', filterTable);
+        document.getElementById('monthFilter').addEventListener('change', filterTable);
+        document.getElementById('industryFilter').addEventListener('change', filterTable);
+        document.getElementById('locationFilter').addEventListener('change', filterTable);
+
+        // Load data when page loads
+        window.addEventListener('load', loadData);
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const monthFilter = document.getElementById('monthFilter').value;
+            const industryFilter = document.getElementById('industryFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+            const table = document.getElementById('layoffsTable');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = tbody.getElementsByTagName('tr');
+            let visibleRows = 0;
+            let totalLayoffs = 0;
+            let companies = new Set();
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const companyName = row.getElementsByTagName('td')[0].textContent.toLowerCase();
+                const layoffs = row.getElementsByTagName('td')[1].textContent;
+                const date = row.getElementsByTagName('td')[3];
+                const industry = row.getElementsByTagName('td')[4].textContent;
+                const location = row.getElementsByTagName('td')[5].textContent.toLowerCase();
+
+                const month = date.getAttribute('data-month');
+                const layoffNumber = parseInt(layoffs.replace(/,/g, ''));
+
+                // Check if row matches all filters
+                const matchesSearch = companyName.includes(searchTerm) ||
+                                    industry.toLowerCase().includes(searchTerm) ||
+                                    location.includes(searchTerm);
+                const matchesMonth = !monthFilter || month === monthFilter;
+                const matchesIndustry = !industryFilter || industry === industryFilter;
+                const matchesLocation = !locationFilter || location.includes(locationFilter.toLowerCase());
+
+                if (matchesSearch && matchesMonth && matchesIndustry && matchesLocation) {
+                    row.style.display = '';
+                    visibleRows++;
+                    totalLayoffs += layoffNumber;
+                    companies.add(companyName);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            // Update stats
+            document.getElementById('totalLayoffs').textContent = totalLayoffs.toLocaleString();
+            document.getElementById('totalCompanies').textContent = companies.size;
+
+            // Show/hide no results message
+            document.getElementById('noResults').style.display = visibleRows === 0 ? 'block' : 'none';
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('industryFilter').value = '';
+            document.getElementById('locationFilter').value = '';
+            filterTable();
+        }
+
+        // Sorting functionality
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("layoffsTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    // Handle numeric columns (layoffs)
+                    if (n === 1) {
+                        const xNum = parseInt(x.innerHTML.replace(/,/g, ''));
+                        const yNum = parseInt(y.innerHTML.replace(/,/g, ''));
+                        if (dir == "asc") {
+                            if (xNum > yNum) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (xNum < yNum) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Handle text columns
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        // Admin functionality
+        let adminPredictions = [
+            {
+                id: 1,
+                company: "TBD Company",
+                risk: "high",
+                timeline: "Q4 2025",
+                reason: "Market conditions and funding challenges"
+            },
+            {
+                id: 2,
+                company: "Example Corp",
+                risk: "medium",
+                timeline: "Q1 2026",
+                reason: "Industry consolidation expected"
+            }
+        ];
+        let nextPredictionId = 3;
+        let currentEditingId = null;
+
+        function showAdminLogin() {
+            document.getElementById('adminModal').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            clearAdminForms();
+        }
+
+        function adminLogin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            // Simple auth check - in production, this would be server-side
+            if (email === 'dana@added-value.co.il' && password === 'admin123') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadAdminPredictions();
+                clearAdminForms();
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            clearAdminForms();
+        }
+
+        function clearAdminForms() {
+            document.getElementById('adminEmail').value = '';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('newCompany').value = '';
+            document.getElementById('newRisk').value = '';
+            document.getElementById('newTimeline').value = '';
+            document.getElementById('newReason').value = '';
+            currentEditingId = null;
+        }
+
+        function loadAdminPredictions() {
+            const container = document.getElementById('adminPredictionsList');
+            container.innerHTML = '';
+
+            adminPredictions.forEach(prediction => {
+                const item = document.createElement('div');
+                item.className = 'admin-prediction-item';
+                item.innerHTML = `
+                    <div class="admin-prediction-info">
+                        <strong>${prediction.company}</strong> -
+                        <span style="color: ${prediction.risk === 'high' ? '#d32f2f' : prediction.risk === 'medium' ? '#ff9800' : '#4CAF50'}">${prediction.risk.toUpperCase()} RISK</span> -
+                        ${prediction.timeline}<br>
+                        <em>${prediction.reason}</em>
+                    </div>
+                    <div class="admin-prediction-actions">
+                        <button class="edit-btn" onclick="editPrediction(${prediction.id})">Edit</button>
+                        <button class="delete-btn" onclick="deletePrediction(${prediction.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addPrediction() {
+            const company = document.getElementById('newCompany').value;
+            const risk = document.getElementById('newRisk').value;
+            const timeline = document.getElementById('newTimeline').value;
+            const reason = document.getElementById('newReason').value;
+
+            if (!company || !risk || !timeline || !reason) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (currentEditingId) {
+                // Update existing prediction
+                const index = adminPredictions.findIndex(p => p.id === currentEditingId);
+                if (index !== -1) {
+                    adminPredictions[index] = {
+                        id: currentEditingId,
+                        company,
+                        risk,
+                        timeline,
+                        reason
+                    };
+                }
+                currentEditingId = null;
+            } else {
+                // Add new prediction
+                adminPredictions.push({
+                    id: nextPredictionId++,
+                    company,
+                    risk,
+                    timeline,
+                    reason
+                });
+            }
+
+            clearAdminForms();
+            loadAdminPredictions();
+        }
+
+        function editPrediction(id) {
+            const prediction = adminPredictions.find(p => p.id === id);
+            if (prediction) {
+                document.getElementById('newCompany').value = prediction.company;
+                document.getElementById('newRisk').value = prediction.risk;
+                document.getElementById('newTimeline').value = prediction.timeline;
+                document.getElementById('newReason').value = prediction.reason;
+                currentEditingId = id;
+            }
+        }
+
+        function deletePrediction(id) {
+            if (confirm('Are you sure you want to delete this prediction?')) {
+                adminPredictions = adminPredictions.filter(p => p.id !== id);
+                loadAdminPredictions();
+            }
+        }
+
+        function savePredictions() {
+            updatePredictionsDisplay();
+            alert('Predictions updated successfully!');
+            closeAdminModal();
+        }
+
+        function updatePredictionsDisplay() {
+            const container = document.querySelector('.predictive-cards');
+            const cardsHTML = adminPredictions.map(prediction => `
+                <div class="predictive-card">
+                    <div class="predictive-company">${prediction.company}</div>
+                    <div class="predictive-details">
+                        <span class="predictive-risk ${prediction.risk === 'medium' ? 'medium' : ''}">${prediction.risk.charAt(0).toUpperCase() + prediction.risk.slice(1)} Risk</span>
+                        <span class="predictive-timeline">${prediction.timeline}</span>
+                    </div>
+                    <div class="predictive-reason">${prediction.reason}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = cardsHTML + `
+                <div class="admin-note">
+                    <strong>Admin Note:</strong> This section will be updated manually as new intelligence becomes available.
+                    Predictions are based on market analysis and should be considered speculative.
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('adminModal');
+            if (event.target === modal) {
+                closeAdminModal();
+            }
+        }
+    </script>
+</body>
+</html>

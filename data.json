@@ -1,0 +1,277 @@
+{
+  "lastUpdated": "2025-09-24",
+  "totalLayoffs": 96861,
+  "totalCompanies": 413,
+  "layoffs": [
+    {
+      "company": "Intel",
+      "layoffs": 24000,
+      "percentage": "~24%",
+      "date": "2025-07-15",
+      "month": "July",
+      "industry": "Semiconductors",
+      "location": "Global (2,400 in Oregon)",
+      "source": "CEO Lip-Bu Tan announcement"
+    },
+    {
+      "company": "Microsoft",
+      "layoffs": 15000,
+      "percentage": "~4%",
+      "date": "2025-07-01",
+      "month": "July",
+      "industry": "Software",
+      "location": "Global",
+      "source": "Company restructuring"
+    },
+    {
+      "company": "Meta",
+      "layoffs": 3600,
+      "percentage": "5%",
+      "date": "2025-01-15",
+      "month": "January",
+      "industry": "Social Media",
+      "location": "Global (100+ in Reality Labs)",
+      "source": "Reality Labs restructuring"
+    },
+    {
+      "company": "Google",
+      "layoffs": 1000,
+      "percentage": "~1%",
+      "date": "2025-08-01",
+      "month": "August",
+      "industry": "Software",
+      "location": "Global (25% of TV division)",
+      "source": "Platforms and devices restructuring"
+    },
+    {
+      "company": "Amazon",
+      "layoffs": 2500,
+      "percentage": "~1%",
+      "date": "2025-06-15",
+      "month": "June",
+      "industry": "E-commerce/Cloud",
+      "location": "Global (AWS, Twitch, Ads)",
+      "source": "Multiple division cuts"
+    },
+    {
+      "company": "IBM",
+      "layoffs": 3000,
+      "percentage": "~3%",
+      "date": "2025-05-01",
+      "month": "May",
+      "industry": "Enterprise Software",
+      "location": "Global",
+      "source": "AI transformation strategy"
+    },
+    {
+      "company": "PwC",
+      "layoffs": 1800,
+      "percentage": "~2%",
+      "date": "2025-04-20",
+      "month": "April",
+      "industry": "Consulting",
+      "location": "United States",
+      "source": "Business restructuring"
+    },
+    {
+      "company": "Chegg",
+      "layoffs": 441,
+      "percentage": "~23%",
+      "date": "2025-06-10",
+      "month": "June",
+      "industry": "EdTech",
+      "location": "Global",
+      "source": "AI impact on business model"
+    },
+    {
+      "company": "Twitch",
+      "layoffs": 500,
+      "percentage": "~35%",
+      "date": "2025-01-10",
+      "month": "January",
+      "industry": "Streaming Platform",
+      "location": "Global",
+      "source": "Cost reduction measures"
+    },
+    {
+      "company": "Discord",
+      "layoffs": 170,
+      "percentage": "~17%",
+      "date": "2025-01-11",
+      "month": "January",
+      "industry": "Communication Platform",
+      "location": "Global",
+      "source": "Operational efficiency"
+    },
+    {
+      "company": "Duolingo",
+      "layoffs": 250,
+      "percentage": "~10%",
+      "date": "2025-03-15",
+      "month": "March",
+      "industry": "EdTech",
+      "location": "Global",
+      "source": "AI automation of content creation"
+    },
+    {
+      "company": "Snap Inc.",
+      "layoffs": 528,
+      "percentage": "~10%",
+      "date": "2025-02-28",
+      "month": "February",
+      "industry": "Social Media",
+      "location": "Global",
+      "source": "Restructuring efforts"
+    },
+    {
+      "company": "Unity",
+      "layoffs": 1800,
+      "percentage": "~25%",
+      "date": "2025-01-08",
+      "month": "January",
+      "industry": "Gaming/Software",
+      "location": "Global",
+      "source": "Company reset strategy"
+    },
+    {
+      "company": "eBay",
+      "layoffs": 1000,
+      "percentage": "~9%",
+      "date": "2025-01-24",
+      "month": "January",
+      "industry": "E-commerce",
+      "location": "Global",
+      "source": "Organizational changes"
+    },
+    {
+      "company": "PayPal",
+      "layoffs": 2500,
+      "percentage": "~9%",
+      "date": "2025-01-31",
+      "month": "January",
+      "industry": "Fintech",
+      "location": "Global",
+      "source": "Strategic realignment"
+    },
+    {
+      "company": "Fiverr",
+      "layoffs": 250,
+      "percentage": "~15%",
+      "date": "2025-09-15",
+      "month": "September",
+      "industry": "Freelance Platform",
+      "location": "Israel (Tel Aviv)",
+      "source": "AI-first strategy shift"
+    },
+    {
+      "company": "ZipRecruiter",
+      "layoffs": 80,
+      "percentage": "~5%",
+      "date": "2025-09-16",
+      "month": "September",
+      "industry": "Recruitment Tech",
+      "location": "Israel",
+      "source": "Rising costs amid challenging markets"
+    },
+    {
+      "company": "Yotpo",
+      "layoffs": 200,
+      "percentage": "34%",
+      "date": "2025-08-05",
+      "month": "August",
+      "industry": "E-commerce Marketing",
+      "location": "Israel (Tel Aviv)",
+      "source": "Cost optimization"
+    },
+    {
+      "company": "Intel Israel",
+      "layoffs": 1800,
+      "percentage": "~20%",
+      "date": "2025-07-07",
+      "month": "July",
+      "industry": "Semiconductors",
+      "location": "Israel (Kiryat Gat, Haifa)",
+      "source": "Global restructuring plan"
+    },
+    {
+      "company": "Amdocs",
+      "layoffs": 500,
+      "percentage": "~5%",
+      "date": "2025-08-11",
+      "month": "August",
+      "industry": "Telecom Software",
+      "location": "Israel (Ra'anana)",
+      "source": "GenAI & Data unit launch"
+    },
+    {
+      "company": "Kaltura",
+      "layoffs": 120,
+      "percentage": "10%",
+      "date": "2025-08-07",
+      "month": "August",
+      "industry": "Video Technology",
+      "location": "Israel (New York)",
+      "source": "Operational efficiency"
+    },
+    {
+      "company": "TytoCare",
+      "layoffs": 60,
+      "percentage": "20%",
+      "date": "2025-07-17",
+      "month": "July",
+      "industry": "HealthTech",
+      "location": "Israel (Netanya)",
+      "source": "Cash flow optimization"
+    },
+    {
+      "company": "Augury",
+      "layoffs": 45,
+      "percentage": "18%",
+      "date": "2025-07-10",
+      "month": "July",
+      "industry": "Industrial IoT",
+      "location": "Israel (Ramat Gan)",
+      "source": "Market focus adjustment"
+    },
+    {
+      "company": "Nayax",
+      "layoffs": 70,
+      "percentage": "~12%",
+      "date": "2025-07-07",
+      "month": "July",
+      "industry": "Payment Solutions",
+      "location": "Israel (Herzliya)",
+      "source": "Business optimization"
+    },
+    {
+      "company": "Verbit",
+      "layoffs": 22,
+      "percentage": "~8%",
+      "date": "2025-09-10",
+      "month": "September",
+      "industry": "AI Transcription",
+      "location": "Israel (Tel Aviv)",
+      "source": "Third round of layoffs"
+    },
+    {
+      "company": "Tipalti",
+      "layoffs": 50,
+      "percentage": "~5%",
+      "date": "2025-07-24",
+      "month": "July",
+      "industry": "Accounts Payable",
+      "location": "Israel (Glil Yam)",
+      "source": "Cost management"
+    },
+    {
+      "company": "Riskified",
+      "layoffs": 40,
+      "percentage": "6%",
+      "date": "2025-05-15",
+      "month": "May",
+      "industry": "Fintech/Fraud Prevention",
+      "location": "Israel (Tel Aviv)",
+      "source": "EBITDA target acceleration"
+    }
+  ]
+}
