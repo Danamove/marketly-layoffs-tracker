@@ -202,6 +202,22 @@
         .delete-btn:hover {
             background: #b71c1c !important;
         }
+        .access-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+        }
+        .access-btn:hover {
+            background: #b71c1c;
+        }
+        .predictive-access-section {
+            margin-bottom: 20px;
+        }
         .controls {
             background: white;
             padding: 20px;
@@ -326,13 +342,12 @@
         </div>
     </div>
 
-    <!-- Predictive Section -->
-    <div class="predictive-section">
+    <!-- Predictive Section (Password Protected) -->
+    <div class="predictive-section" id="predictiveSection" style="display: none;">
         <h3 style="color: #d32f2f; margin-bottom: 15px;">🔮 Predictive Layoffs & Closures</h3>
         <div class="predictive-content">
             <p style="color: #666; font-style: italic; margin-bottom: 20px;">
-                This section is manually curated by our admin team. For updates, contact:
-                <a href="mailto:dana@added-value.co.il" style="color: #d32f2f;">dana@added-value.co.il</a>
+                This section is manually curated by our admin team.
             </p>
 
             <div class="predictive-cards">
@@ -359,6 +374,15 @@
                     Predictions are based on market analysis and should be considered speculative.
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Predictive Access Section -->
+    <div class="predictive-access-section">
+        <h3 style="color: #d32f2f; margin-bottom: 15px;">🔮 Predictive Layoffs & Closures</h3>
+        <div style="text-align: center; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <p style="color: #666; margin-bottom: 20px;">This section contains predictive analysis and requires password access.</p>
+            <button class="access-btn" onclick="showPredictiveLogin()">Access Predictions</button>
         </div>
     </div>
 
@@ -439,14 +463,20 @@
         </div>
     </div>
 
-    <!-- Admin Modal -->
+    <!-- Admin/Predictive Modal -->
     <div id="adminModal" class="admin-modal">
         <div class="admin-content">
-            <h3>Admin Login</h3>
+            <h3 id="modalTitle">Admin Login</h3>
             <div id="loginForm">
                 <input type="email" id="adminEmail" placeholder="Admin Email" required>
                 <input type="password" id="adminPassword" placeholder="Password" required>
                 <button onclick="adminLogin()">Login</button>
+                <button class="cancel-btn" onclick="closeAdminModal()">Cancel</button>
+            </div>
+
+            <div id="predictiveLoginForm" style="display: none;">
+                <input type="password" id="predictivePassword" placeholder="Access Password" required>
+                <button onclick="predictiveLogin()">Access Predictions</button>
                 <button class="cancel-btn" onclick="closeAdminModal()">Cancel</button>
             </div>
 
@@ -704,7 +734,17 @@
 
         function showAdminLogin() {
             document.getElementById('adminModal').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Admin Login';
             document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('predictiveLoginForm').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function showPredictiveLogin() {
+            document.getElementById('adminModal').style.display = 'block';
+            document.getElementById('modalTitle').textContent = 'Access Predictions';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('predictiveLoginForm').style.display = 'block';
             document.getElementById('adminPanel').style.display = 'none';
         }
 
@@ -728,6 +768,21 @@
             }
         }
 
+        function predictiveLogin() {
+            const password = document.getElementById('predictivePassword').value;
+
+            if (password === 'Added') {
+                document.getElementById('predictiveSection').style.display = 'block';
+                document.getElementById('adminModal').style.display = 'none';
+                document.querySelector('.predictive-access-section').style.display = 'none';
+                clearAdminForms();
+                // Scroll to predictive section
+                document.getElementById('predictiveSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Invalid password. Please try again.');
+            }
+        }
+
         function adminLogout() {
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
@@ -737,6 +792,7 @@
         function clearAdminForms() {
             document.getElementById('adminEmail').value = '';
             document.getElementById('adminPassword').value = '';
+            document.getElementById('predictivePassword').value = '';
             document.getElementById('newCompany').value = '';
             document.getElementById('newRisk').value = '';
             document.getElementById('newTimeline').value = '';
