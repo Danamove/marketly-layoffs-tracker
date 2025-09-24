@@ -833,25 +833,65 @@
 
         // Admin functionality - includes both manual and automated predictions
         let adminPredictions = [
-            // Manual predictions (examples)
+            // Manual predictions
             {
                 id: 1,
-                company: "TBD Company",
+                company: "Lithricks",
                 risk: "high",
                 timeline: "Q4 2025",
-                reason: "Market conditions and funding challenges",
+                reason: "Israeli tech market vulnerability and industry consolidation pressure",
                 source: "manual"
             },
             {
                 id: 2,
-                company: "Example Corp",
+                company: "Payzen",
                 risk: "medium",
                 timeline: "Q1 2026",
-                reason: "Industry consolidation expected",
+                reason: "Fintech sector restructuring trends and competitive market pressure",
+                source: "manual"
+            },
+            {
+                id: 3,
+                company: "Payem",
+                risk: "medium",
+                timeline: "Q1 2026",
+                reason: "Payment solutions market consolidation and regulatory changes",
+                source: "manual"
+            },
+            {
+                id: 4,
+                company: "Claroty",
+                risk: "low",
+                timeline: "Q2 2026",
+                reason: "Cybersecurity demand remains strong but cost optimization possible",
+                source: "manual"
+            },
+            {
+                id: 5,
+                company: "Papaya Global",
+                risk: "high",
+                timeline: "Q4 2025",
+                reason: "HR tech sector under pressure, similar to recent layoffs in the space",
+                source: "manual"
+            },
+            {
+                id: 6,
+                company: "Guardio",
+                risk: "medium",
+                timeline: "Q1 2026",
+                reason: "Consumer security market challenges and growth scaling issues",
+                source: "manual"
+            },
+            {
+                id: 7,
+                company: "Env0",
+                risk: "low",
+                timeline: "Q2 2026",
+                reason: "DevOps infrastructure demand strong but potential efficiency optimization",
                 source: "manual"
             }
         ];
-        let nextPredictionId = 3;
+        let nextPredictionId = 8;
 
         // Automated prediction system
         const companiesDatabase = {
