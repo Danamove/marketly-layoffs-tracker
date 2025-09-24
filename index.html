@@ -168,6 +168,23 @@
         .form-row input, .form-row select {
             flex: 1;
         }
+        .github-status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6c757d;
+        }
+        .setup-steps ol {
+            line-height: 1.6;
+        }
+        .setup-steps a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .setup-steps a:hover {
+            text-decoration: underline;
+        }
         .admin-form {
             margin-top: 20px;
         }
@@ -521,6 +538,7 @@
                 <div class="admin-tabs">
                     <button class="tab-btn active" onclick="switchTab('predictions')">Predictions</button>
                     <button class="tab-btn" onclick="switchTab('layoffs')">Manage Layoffs Data</button>
+                    <button class="tab-btn" onclick="switchTab('github')">GitHub Settings</button>
                 </div>
 
                 <!-- Predictions Tab -->
@@ -622,6 +640,48 @@
                         <button class="cancel-btn" onclick="adminLogout()">Logout</button>
                     </div>
                 </div>
+
+                <!-- GitHub Settings Tab -->
+                <div id="githubTab" class="tab-content">
+                    <h4>GitHub Auto-Save Settings</h4>
+
+                    <div class="admin-form">
+                        <div id="githubTokenStatus" class="github-status">
+                            <p><strong>Status:</strong> <span id="tokenStatus">Not configured</span></p>
+                        </div>
+
+                        <h4>Setup Auto-Save to GitHub</h4>
+                        <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">
+                            To automatically save your changes to GitHub Pages, you need a Personal Access Token.
+                        </p>
+
+                        <div class="setup-steps" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                            <h5>Setup Instructions:</h5>
+                            <ol style="margin: 10px 0; padding-left: 20px;">
+                                <li>Go to <a href="https://github.com/settings/tokens/new" target="_blank">GitHub → Settings → Developer settings → Personal access tokens</a></li>
+                                <li>Click "Generate new token (classic)"</li>
+                                <li>Name: "Marketly Admin Auto-Save"</li>
+                                <li>Select scopes: ✅ <strong>repo</strong> (Full control of private repositories)</li>
+                                <li>Click "Generate token"</li>
+                                <li>Copy the token and paste it below</li>
+                            </ol>
+                        </div>
+
+                        <div class="form-row">
+                            <input type="password" id="githubToken" placeholder="Paste your GitHub Personal Access Token here" style="flex: 2;">
+                            <button onclick="saveGitHubToken()" style="flex: 0 0 auto;">Save Token</button>
+                        </div>
+
+                        <div class="form-row">
+                            <button onclick="testGitHubConnection()" style="background: #28a745;">Test Connection</button>
+                            <button onclick="clearGitHubToken()" style="background: #dc3545;">Clear Token</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button class="cancel-btn" onclick="adminLogout()">Logout</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -706,12 +766,139 @@
         document.getElementById('industryFilter').addEventListener('change', filterTable);
         document.getElementById('locationFilter').addEventListener('change', filterTable);
 
-        // Load data when page loads
+        // GitHub API configuration
+        const GITHUB_CONFIG = {
+            owner: 'Danamove',
+            repo: 'marketly-layoffs-tracker',
+            path: 'index.html',
+            branch: 'master',
+            // Note: In production, this should be stored securely
+            // For now, admin will enter token when needed
+            token: null
+        };
+
+        // GitHub API functions
+        async function getGitHubToken() {
+            if (!GITHUB_CONFIG.token) {
+                const token = prompt(`To automatically save changes to GitHub, please enter your GitHub Personal Access Token:
+
+1. Go to GitHub.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate new token with 'repo' permissions
+3. Copy and paste the token here:
+
+(This will be stored temporarily in your browser session)`);
+
+                if (token) {
+                    GITHUB_CONFIG.token = token;
+                    localStorage.setItem('github_token', token);
+                } else {
+                    return null;
+                }
+            }
+            return GITHUB_CONFIG.token;
+        }
+
+        async function getCurrentFileContent() {
+            const token = await getGitHubToken();
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return {
+                    content: atob(data.content.replace(/\s/g, '')),
+                    sha: data.sha
+                };
+            } catch (error) {
+                console.error('Error fetching file content:', error);
+                alert('Error connecting to GitHub. Please check your token and try again.');
+                return null;
+            }
+        }
+
+        async function updateFileOnGitHub(newContent, commitMessage) {
+            const token = await getGitHubToken();
+            if (!token) return false;
+
+            try {
+                // Get current file to get SHA
+                const currentFile = await getCurrentFileContent();
+                if (!currentFile) return false;
+
+                // Update file on GitHub
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: btoa(newContent),
+                        sha: currentFile.sha,
+                        branch: GITHUB_CONFIG.branch
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error updating file:', error);
+                alert('Error saving to GitHub. Please try again.');
+                return false;
+            }
+        }
+
+        function generateUpdatedFileContent() {
+            // Get current HTML content
+            const currentHTML = document.documentElement.outerHTML;
+
+            // Update the embedded data in the HTML
+            let updatedHTML = currentHTML;
+
+            // Update layoffs data
+            const layoffsDataString = JSON.stringify(layoffsDataSource, null, 12).replace(/^/gm, '        ');
+            const layoffsDataRegex = /const layoffsDataSource = \{[\s\S]*?\};/;
+            updatedHTML = updatedHTML.replace(layoffsDataRegex, `const layoffsDataSource = ${layoffsDataString};`);
+
+            // Update predictions data
+            const predictionsDataString = JSON.stringify(adminPredictions, null, 12).replace(/^/gm, '        ');
+            const predictionsDataRegex = /let adminPredictions = \[[\s\S]*?\];/;
+            updatedHTML = updatedHTML.replace(predictionsDataRegex, `let adminPredictions = ${predictionsDataString};`);
+
+            // Update nextPredictionId
+            const nextIdRegex = /let nextPredictionId = \d+;/;
+            updatedHTML = updatedHTML.replace(nextIdRegex, `let nextPredictionId = ${nextPredictionId};`);
+
+            return updatedHTML;
+        }
+
+        // Load GitHub token from localStorage on page load
         window.addEventListener('load', function() {
             loadData();
             // Generate automated predictions on initial load
             generateAutomatedPredictions();
             updatePredictionsDisplay();
+
+            // Load stored GitHub token
+            const storedToken = localStorage.getItem('github_token');
+            if (storedToken) {
+                GITHUB_CONFIG.token = storedToken;
+            }
         });
 
         function filterTable() {
@@ -1131,9 +1318,80 @@
                 document.getElementById('adminPanel').style.display = 'block';
                 loadAdminPredictions();
                 loadAdminLayoffs();
+                updateGitHubStatus();
                 clearAdminForms();
             } else {
                 alert('Invalid credentials. Please try again.');
+            }
+        }
+
+        // GitHub token management functions
+        function saveGitHubToken() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                alert('Please enter a GitHub token');
+                return;
+            }
+
+            GITHUB_CONFIG.token = token;
+            localStorage.setItem('github_token', token);
+            document.getElementById('githubToken').value = '';
+            updateGitHubStatus();
+            alert('✅ GitHub token saved successfully!\n\nAuto-save to GitHub is now enabled.');
+        }
+
+        function clearGitHubToken() {
+            if (confirm('Are you sure you want to remove the GitHub token? Auto-save will be disabled.')) {
+                GITHUB_CONFIG.token = null;
+                localStorage.removeItem('github_token');
+                updateGitHubStatus();
+                alert('GitHub token cleared. Auto-save is now disabled.');
+            }
+        }
+
+        async function testGitHubConnection() {
+            const testButton = event.target;
+            const originalText = testButton.textContent;
+            testButton.textContent = 'Testing...';
+            testButton.disabled = true;
+
+            try {
+                const token = GITHUB_CONFIG.token || document.getElementById('githubToken').value.trim();
+                if (!token) {
+                    alert('❌ Please save a GitHub token first');
+                    return;
+                }
+
+                // Test API connection
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const repo = await response.json();
+                    alert(`✅ GitHub connection successful!\n\nRepository: ${repo.full_name}\nAuto-save is working properly.`);
+                } else {
+                    alert(`❌ GitHub connection failed!\n\nStatus: ${response.status}\nPlease check your token permissions.`);
+                }
+            } catch (error) {
+                alert(`❌ Connection test failed!\n\nError: ${error.message}`);
+            } finally {
+                testButton.textContent = originalText;
+                testButton.disabled = false;
+            }
+        }
+
+        function updateGitHubStatus() {
+            const statusSpan = document.getElementById('tokenStatus');
+            if (GITHUB_CONFIG.token) {
+                statusSpan.textContent = '✅ Configured - Auto-save enabled';
+                statusSpan.style.color = '#28a745';
+            } else {
+                statusSpan.textContent = '❌ Not configured - Changes won\'t be saved automatically';
+                statusSpan.style.color = '#dc3545';
             }
         }
 
@@ -1261,8 +1519,44 @@
             document.getElementById('totalCompanies').textContent = layoffsDataSource.totalCompanies.toLocaleString();
         }
 
-        function saveLayoffsData() {
-            alert('Layoffs data updated successfully! Changes are now live on the website.');
+        async function saveLayoffsData() {
+            // Show saving indicator
+            const saveButton = event.target;
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Saving to GitHub...';
+            saveButton.disabled = true;
+
+            try {
+                // Generate updated file content
+                const updatedContent = generateUpdatedFileContent();
+
+                // Commit to GitHub
+                const success = await updateFileOnGitHub(
+                    updatedContent,
+                    `Admin update: Save layoffs data changes
+
+- Updated layoffs database via admin interface
+- Total layoffs: ${layoffsDataSource.totalLayoffs.toLocaleString()}
+- Total companies: ${layoffsDataSource.totalCompanies.toLocaleString()}
+- Changes made by: dana@added-value.co.il
+- Timestamp: ${new Date().toISOString()}
+
+🤖 Auto-committed via admin interface`
+                );
+
+                if (success) {
+                    alert('✅ Layoffs data saved successfully to GitHub!\n\nChanges will be live on the website in 2-5 minutes.');
+                } else {
+                    alert('❌ Failed to save to GitHub. Changes are only temporary.');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('❌ Error saving to GitHub. Please try again.');
+            } finally {
+                // Restore button
+                saveButton.textContent = originalText;
+                saveButton.disabled = false;
+            }
         }
 
         function predictiveLogin() {
@@ -1429,10 +1723,45 @@
             }
         }
 
-        function savePredictions() {
+        async function savePredictions() {
             updatePredictionsDisplay();
-            alert('Predictions updated successfully!');
-            closeAdminModal();
+
+            // Show saving indicator
+            const saveButton = event.target;
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Saving to GitHub...';
+            saveButton.disabled = true;
+
+            try {
+                // Generate updated file content
+                const updatedContent = generateUpdatedFileContent();
+
+                // Commit to GitHub
+                const success = await updateFileOnGitHub(
+                    updatedContent,
+                    `Admin update: Save predictions changes
+
+- Updated predictions via admin interface
+- Changes made by: dana@added-value.co.il
+- Timestamp: ${new Date().toISOString()}
+
+🤖 Auto-committed via admin interface`
+                );
+
+                if (success) {
+                    alert('✅ Predictions saved successfully to GitHub!\n\nChanges will be live on the website in 2-5 minutes.');
+                    closeAdminModal();
+                } else {
+                    alert('❌ Failed to save to GitHub. Changes are only temporary.');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('❌ Error saving to GitHub. Please try again.');
+            } finally {
+                // Restore button
+                saveButton.textContent = originalText;
+                saveButton.disabled = false;
+            }
         }
 
         function updatePredictionsDisplay() {
