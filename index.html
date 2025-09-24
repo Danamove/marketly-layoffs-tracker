@@ -484,7 +484,18 @@
                 <h3>Admin Panel - Predictive Layoffs & Closures</h3>
 
                 <div class="admin-form">
-                    <h4>Add New Prediction</h4>
+                    <h4>Automated Predictions</h4>
+                    <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">
+                        Generate AI-powered predictions based on industry patterns, company similarities, and market trends.
+                    </p>
+                    <button onclick="generateAndShowPredictions()" style="background: #2196F3; margin-bottom: 20px;">
+                        🤖 Generate Automated Predictions
+                    </button>
+                    <div id="automatedPredictionsInfo" style="display: none; background: #e8f5e8; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                        <p id="automatedPredictionsCount" style="margin: 0; color: #2e7d32; font-weight: bold;"></p>
+                    </div>
+
+                    <h4>Add Manual Prediction</h4>
                     <input type="text" id="newCompany" placeholder="Company Name" required>
                     <select id="newRisk" required>
                         <option value="">Select Risk Level</option>
@@ -494,7 +505,7 @@
                     </select>
                     <input type="text" id="newTimeline" placeholder="Timeline (e.g., Q4 2025)" required>
                     <textarea id="newReason" placeholder="Reason for prediction" required></textarea>
-                    <button onclick="addPrediction()">Add Prediction</button>
+                    <button onclick="addPrediction()">Add Manual Prediction</button>
                 </div>
 
                 <div class="admin-predictions-list">
@@ -593,7 +604,12 @@
         document.getElementById('locationFilter').addEventListener('change', filterTable);
 
         // Load data when page loads
-        window.addEventListener('load', loadData);
+        window.addEventListener('load', function() {
+            loadData();
+            // Generate automated predictions on initial load
+            generateAutomatedPredictions();
+            updatePredictionsDisplay();
+        });
 
         function filterTable() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -712,24 +728,233 @@
             }
         }
 
-        // Admin functionality
+        // Admin functionality - includes both manual and automated predictions
         let adminPredictions = [
+            // Manual predictions (examples)
             {
                 id: 1,
                 company: "TBD Company",
                 risk: "high",
                 timeline: "Q4 2025",
-                reason: "Market conditions and funding challenges"
+                reason: "Market conditions and funding challenges",
+                source: "manual"
             },
             {
                 id: 2,
                 company: "Example Corp",
                 risk: "medium",
                 timeline: "Q1 2026",
-                reason: "Industry consolidation expected"
+                reason: "Industry consolidation expected",
+                source: "manual"
             }
         ];
         let nextPredictionId = 3;
+
+        // Automated prediction system
+        const companiesDatabase = {
+            // Israeli tech companies at potential risk
+            "ironSource": {
+                industry: "AdTech/Gaming",
+                location: "Israel",
+                employees: 1200,
+                fundingStage: "public",
+                similarTo: ["Unity", "Meta"]
+            },
+            "Waze": {
+                industry: "Navigation/Maps",
+                location: "Israel",
+                employees: 400,
+                fundingStage: "acquired",
+                similarTo: ["Google"]
+            },
+            "JFrog": {
+                industry: "DevOps/Software",
+                location: "Israel",
+                employees: 800,
+                fundingStage: "public",
+                similarTo: ["IBM", "Microsoft"]
+            },
+            "Monday.com": {
+                industry: "Productivity Software",
+                location: "Israel",
+                employees: 1500,
+                fundingStage: "public",
+                similarTo: ["Microsoft", "IBM"]
+            },
+            "Outbrain": {
+                industry: "Content Discovery",
+                location: "Israel",
+                employees: 800,
+                fundingStage: "public",
+                similarTo: ["Meta", "Google"]
+            },
+            "SimilarWeb": {
+                industry: "Web Analytics",
+                location: "Israel",
+                employees: 1100,
+                fundingStage: "public",
+                similarTo: ["Google", "IBM"]
+            },
+            "Gett": {
+                industry: "Ride-hailing",
+                location: "Israel",
+                employees: 600,
+                fundingStage: "private",
+                similarTo: ["Amazon", "Microsoft"]
+            },
+            // Global companies with similar profiles
+            "Spotify": {
+                industry: "Streaming Platform",
+                location: "Global",
+                employees: 9000,
+                fundingStage: "public",
+                similarTo: ["Twitch", "Discord"]
+            },
+            "Slack": {
+                industry: "Communication Platform",
+                location: "Global",
+                employees: 2500,
+                fundingStage: "acquired",
+                similarTo: ["Discord", "Microsoft"]
+            },
+            "Zoom": {
+                industry: "Communication Platform",
+                location: "Global",
+                employees: 8000,
+                fundingStage: "public",
+                similarTo: ["Microsoft", "Google"]
+            },
+            "Dropbox": {
+                industry: "Cloud Storage",
+                location: "Global",
+                employees: 3000,
+                fundingStage: "public",
+                similarTo: ["Microsoft", "Google"]
+            },
+            "Coursera": {
+                industry: "EdTech",
+                location: "Global",
+                employees: 1000,
+                fundingStage: "public",
+                similarTo: ["Duolingo", "Chegg"]
+            },
+            "Robinhood": {
+                industry: "Fintech",
+                location: "Global",
+                employees: 3800,
+                fundingStage: "public",
+                similarTo: ["PayPal", "Riskified"]
+            }
+        };
+
+        // Risk assessment algorithm
+        function calculateRiskScore(company, companyData) {
+            let riskScore = 0;
+            let reasons = [];
+
+            // Check if similar companies have had layoffs
+            const affectedSimilarCompanies = companyData.similarTo.filter(similar =>
+                layoffsDataSource.layoffs.some(layoff => layoff.company === similar)
+            );
+
+            if (affectedSimilarCompanies.length > 0) {
+                riskScore += affectedSimilarCompanies.length * 25;
+                reasons.push(`Similar companies affected: ${affectedSimilarCompanies.join(', ')}`);
+            }
+
+            // Industry risk factors
+            const industryLayoffs = layoffsDataSource.layoffs.filter(layoff =>
+                layoff.industry === companyData.industry ||
+                (companyData.industry.includes('EdTech') && layoff.industry.includes('EdTech')) ||
+                (companyData.industry.includes('Social Media') && layoff.industry.includes('Social Media')) ||
+                (companyData.industry.includes('Software') && layoff.industry.includes('Software'))
+            );
+
+            if (industryLayoffs.length > 0) {
+                const avgLayoffPercentage = industryLayoffs.reduce((sum, layoff) => {
+                    const percentage = parseFloat(layoff.percentage.replace(/[~%]/g, ''));
+                    return sum + (percentage || 0);
+                }, 0) / industryLayoffs.length;
+
+                riskScore += Math.min(avgLayoffPercentage * 2, 40);
+                reasons.push(`Industry trend: ${industryLayoffs.length} ${companyData.industry} companies affected`);
+            }
+
+            // Israeli tech market vulnerability
+            if (companyData.location.includes('Israel')) {
+                const israeliLayoffs = layoffsDataSource.layoffs.filter(layoff =>
+                    layoff.location.includes('Israel')
+                );
+                if (israeliLayoffs.length > 8) { // High concentration
+                    riskScore += 20;
+                    reasons.push(`Israeli tech market vulnerability (${israeliLayoffs.length} companies affected)`);
+                }
+            }
+
+            // AI disruption factor
+            const aiDisruptedIndustries = ['EdTech', 'AI Transcription', 'Content Discovery', 'Customer Support'];
+            if (aiDisruptedIndustries.some(industry => companyData.industry.includes(industry))) {
+                riskScore += 15;
+                reasons.push('AI automation potentially disrupting business model');
+            }
+
+            // Public company pressure
+            if (companyData.fundingStage === 'public') {
+                riskScore += 10;
+                reasons.push('Public company under investor pressure for profitability');
+            }
+
+            return {
+                score: Math.min(riskScore, 100),
+                reasons: reasons
+            };
+        }
+
+        // Generate automated predictions
+        function generateAutomatedPredictions() {
+            const automatedPredictions = [];
+            let predictionId = nextPredictionId;
+
+            Object.entries(companiesDatabase).forEach(([company, data]) => {
+                const riskAssessment = calculateRiskScore(company, data);
+
+                if (riskAssessment.score > 30) { // Only predict if significant risk
+                    let riskLevel, timeline;
+
+                    if (riskAssessment.score >= 70) {
+                        riskLevel = 'high';
+                        timeline = 'Q4 2025 - Q1 2026';
+                    } else if (riskAssessment.score >= 50) {
+                        riskLevel = 'medium';
+                        timeline = 'Q1 2026 - Q2 2026';
+                    } else {
+                        riskLevel = 'low';
+                        timeline = 'Q2 2026 - Q4 2026';
+                    }
+
+                    automatedPredictions.push({
+                        id: predictionId++,
+                        company: company,
+                        risk: riskLevel,
+                        timeline: timeline,
+                        reason: riskAssessment.reasons.join('; '),
+                        source: 'automated',
+                        riskScore: riskAssessment.score
+                    });
+                }
+            });
+
+            // Sort by risk score descending
+            automatedPredictions.sort((a, b) => b.riskScore - a.riskScore);
+
+            // Add to admin predictions (remove existing automated ones first)
+            adminPredictions = adminPredictions.filter(p => p.source !== 'automated');
+            adminPredictions.push(...automatedPredictions);
+
+            nextPredictionId = predictionId;
+
+            return automatedPredictions.length;
+        }
         let currentEditingId = null;
 
         function showAdminLogin() {
@@ -804,18 +1029,40 @@
             const container = document.getElementById('adminPredictionsList');
             container.innerHTML = '';
 
-            adminPredictions.forEach(prediction => {
+            // Sort predictions: automated first, then by risk score
+            const sortedPredictions = [...adminPredictions].sort((a, b) => {
+                if (a.source === 'automated' && b.source !== 'automated') return -1;
+                if (a.source !== 'automated' && b.source === 'automated') return 1;
+                if (a.riskScore && b.riskScore) return b.riskScore - a.riskScore;
+                return 0;
+            });
+
+            sortedPredictions.forEach(prediction => {
                 const item = document.createElement('div');
                 item.className = 'admin-prediction-item';
+                const sourceIcon = prediction.source === 'automated' ? '🤖' : '👤';
+                const sourceLabel = prediction.source === 'automated' ? 'AI Generated' : 'Manual Entry';
+                const riskScoreDisplay = prediction.riskScore ? ` (Score: ${prediction.riskScore})` : '';
+
                 item.innerHTML = `
                     <div class="admin-prediction-info">
-                        <strong>${prediction.company}</strong> -
-                        <span style="color: ${prediction.risk === 'high' ? '#d32f2f' : prediction.risk === 'medium' ? '#ff9800' : '#4CAF50'}">${prediction.risk.toUpperCase()} RISK</span> -
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <strong>${prediction.company}</strong>
+                            <span style="background: ${prediction.source === 'automated' ? '#e3f2fd' : '#f3e5f5'};
+                                         color: ${prediction.source === 'automated' ? '#1976d2' : '#7b1fa2'};
+                                         padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+                                ${sourceIcon} ${sourceLabel}
+                            </span>
+                        </div>
+                        <span style="color: ${prediction.risk === 'high' ? '#d32f2f' : prediction.risk === 'medium' ? '#ff9800' : '#4CAF50'}">${prediction.risk.toUpperCase()} RISK</span>${riskScoreDisplay} -
                         ${prediction.timeline}<br>
-                        <em>${prediction.reason}</em>
+                        <em style="font-size: 0.9em;">${prediction.reason}</em>
                     </div>
                     <div class="admin-prediction-actions">
-                        <button class="edit-btn" onclick="editPrediction(${prediction.id})">Edit</button>
+                        <button class="edit-btn" onclick="editPrediction(${prediction.id})"
+                                ${prediction.source === 'automated' ? 'title="Convert to manual prediction for editing"' : ''}>
+                            ${prediction.source === 'automated' ? 'Convert' : 'Edit'}
+                        </button>
                         <button class="delete-btn" onclick="deletePrediction(${prediction.id})">Delete</button>
                     </div>
                 `;
@@ -870,7 +1117,36 @@
                 document.getElementById('newTimeline').value = prediction.timeline;
                 document.getElementById('newReason').value = prediction.reason;
                 currentEditingId = id;
+
+                // If it's an automated prediction, convert it to manual
+                if (prediction.source === 'automated') {
+                    const index = adminPredictions.findIndex(p => p.id === id);
+                    if (index !== -1) {
+                        adminPredictions[index].source = 'manual';
+                        delete adminPredictions[index].riskScore;
+                    }
+                }
             }
+        }
+
+        // Generate automated predictions and show results
+        function generateAndShowPredictions() {
+            const generatedCount = generateAutomatedPredictions();
+
+            // Show success message
+            const infoDiv = document.getElementById('automatedPredictionsInfo');
+            const countP = document.getElementById('automatedPredictionsCount');
+
+            countP.textContent = `✅ Generated ${generatedCount} automated predictions based on current layoff data and market analysis.`;
+            infoDiv.style.display = 'block';
+
+            // Refresh the admin predictions list
+            loadAdminPredictions();
+
+            // Auto-hide the info after 5 seconds
+            setTimeout(() => {
+                infoDiv.style.display = 'none';
+            }, 8000);
         }
 
         function deletePrediction(id) {
@@ -888,21 +1164,40 @@
 
         function updatePredictionsDisplay() {
             const container = document.querySelector('.predictive-cards');
-            const cardsHTML = adminPredictions.map(prediction => `
-                <div class="predictive-card">
-                    <div class="predictive-company">${prediction.company}</div>
-                    <div class="predictive-details">
-                        <span class="predictive-risk ${prediction.risk === 'medium' ? 'medium' : ''}">${prediction.risk.charAt(0).toUpperCase() + prediction.risk.slice(1)} Risk</span>
-                        <span class="predictive-timeline">${prediction.timeline}</span>
+
+            // Sort predictions by risk level and source
+            const sortedPredictions = [...adminPredictions].sort((a, b) => {
+                const riskOrder = { 'high': 0, 'medium': 1, 'low': 2 };
+                if (riskOrder[a.risk] !== riskOrder[b.risk]) {
+                    return riskOrder[a.risk] - riskOrder[b.risk];
+                }
+                if (a.riskScore && b.riskScore) return b.riskScore - a.riskScore;
+                return 0;
+            });
+
+            const cardsHTML = sortedPredictions.map(prediction => {
+                const sourceIcon = prediction.source === 'automated' ? '🤖' : '';
+                const sourceTitle = prediction.source === 'automated' ? 'AI-Generated Prediction' : 'Expert Analysis';
+
+                return `
+                    <div class="predictive-card" title="${sourceTitle}">
+                        <div class="predictive-company">
+                            ${prediction.company} ${sourceIcon}
+                        </div>
+                        <div class="predictive-details">
+                            <span class="predictive-risk ${prediction.risk === 'medium' ? 'medium' : ''}">${prediction.risk.charAt(0).toUpperCase() + prediction.risk.slice(1)} Risk</span>
+                            <span class="predictive-timeline">${prediction.timeline}</span>
+                        </div>
+                        <div class="predictive-reason">${prediction.reason}</div>
                     </div>
-                    <div class="predictive-reason">${prediction.reason}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             container.innerHTML = cardsHTML + `
                 <div class="admin-note">
-                    <strong>Admin Note:</strong> This section will be updated manually as new intelligence becomes available.
-                    Predictions are based on market analysis and should be considered speculative.
+                    <strong>Prediction Methodology:</strong> This section combines AI-powered analysis (🤖) with expert insights.
+                    AI predictions are based on industry patterns, company similarities, market trends, and historical layoff data.
+                    All predictions are speculative and should be considered as market intelligence.
                 </div>
             `;
         }
