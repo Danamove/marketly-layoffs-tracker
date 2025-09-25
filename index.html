@@ -17,28 +17,6 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .stats-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        .stat-box {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #d32f2f;
-        }
-        .stat-label {
-            color: #666;
-            margin-top: 5px;
-        }
         .predictive-section {
             background: white;
             padding: 25px;
@@ -368,10 +346,6 @@
             .search-box {
                 width: 100%;
             }
-            .stats-container {
-                flex-direction: column;
-                gap: 20px;
-            }
         }
     </style>
 </head>
@@ -382,16 +356,6 @@
         <button id="adminBtn" class="admin-btn" onclick="showAdminLogin()">Admin Login</button>
     </div>
 
-    <div class="stats-container">
-        <div class="stat-box">
-            <div class="stat-number" id="totalLayoffs">23,054</div>
-            <div class="stat-label">Tech Employees Laid Off</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-number" id="totalCompanies">87</div>
-            <div class="stat-label">Companies with Layoffs</div>
-        </div>
-    </div>
 
     <!-- Predictive Section (Password Protected) -->
     <div class="predictive-section" id="predictiveSection" style="display: none;">
@@ -727,10 +691,6 @@
 
         // Initialize data
         function loadData() {
-            // Update stats
-            document.getElementById('totalLayoffs').textContent = layoffsDataSource.totalLayoffs.toLocaleString();
-            document.getElementById('totalCompanies').textContent = layoffsDataSource.totalCompanies.toLocaleString();
-
             // Update last updated info
             const lastUpdated = document.createElement('p');
             lastUpdated.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
@@ -1443,7 +1403,6 @@
             layoffsDataSource.lastUpdated = new Date().toISOString().split('T')[0];
 
             // Update displays
-            updateStatistics();
             populateTable();
             loadAdminLayoffs();
 
@@ -1506,7 +1465,6 @@
                 layoffsData = layoffsDataSource.layoffs;
 
                 // Update displays
-                updateStatistics();
                 populateTable();
                 loadAdminLayoffs();
 
@@ -1514,10 +1472,6 @@
             }
         }
 
-        function updateStatistics() {
-            document.getElementById('totalLayoffs').textContent = layoffsDataSource.totalLayoffs.toLocaleString();
-            document.getElementById('totalCompanies').textContent = layoffsDataSource.totalCompanies.toLocaleString();
-        }
 
         async function saveLayoffsData() {
             // Show saving indicator
