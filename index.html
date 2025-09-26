@@ -564,6 +564,17 @@
                 
                     <div class="predictive-card" title="Expert Analysis">
                         <div class="predictive-company">
+                            Hunters 
+                        </div>
+                        <div class="predictive-details">
+                            <span class="predictive-risk medium">Medium Risk</span>
+                            <span class="predictive-timeline">Q4 2025</span>
+                        </div>
+                        <div class="predictive-reason">Negative reviews</div>
+                    </div>
+                
+                    <div class="predictive-card" title="Expert Analysis">
+                        <div class="predictive-company">
                             Claroty 
                         </div>
                         <div class="predictive-details">
@@ -1353,6 +1364,26 @@
                             Edit
                         </button>
                         <button class="delete-btn" onclick="deletePrediction(21)">Delete</button>
+                    </div>
+                </div><div class="admin-prediction-item">
+                    <div class="admin-prediction-info">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <strong>Hunters</strong>
+                            <span style="background: #f3e5f5;
+                                         color: #7b1fa2;
+                                         padding: 2px 8px; border-radius: 12px; font-size: 0.75em;">
+                                👤 Manual Entry
+                            </span>
+                        </div>
+                        <span style="color: #ff9800">MEDIUM RISK</span> -
+                        Q4 2025<br>
+                        <em style="font-size: 0.9em;">Negative reviews</em>
+                    </div>
+                    <div class="admin-prediction-actions">
+                        <button class="edit-btn" onclick="editPrediction(22)">
+                            Edit
+                        </button>
+                        <button class="delete-btn" onclick="deletePrediction(22)">Delete</button>
                     </div>
                 </div></div>
                 </div>
@@ -2417,9 +2448,16 @@
                             "risk": "medium",
                             "timeline": "Q4 2025",
                             "reason": "Reddit posts"
+                  },
+                  {
+                            "id": 22,
+                            "company": "Hunters",
+                            "risk": "medium",
+                            "timeline": "Q4 2025",
+                            "reason": "Negative reviews"
                   }
         ];
-        let nextPredictionId = 22;
+        let nextPredictionId = 23;
 
         // Automated prediction system
         const companiesDatabase = {
