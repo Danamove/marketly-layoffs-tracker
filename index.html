@@ -617,11 +617,32 @@
     </div>
 
     <!-- Predictive Access Section -->
-    <div class="predictive-access-section" style="display: none;">
+    <div class="predictive-access-section" id="predictiveAccessSection">
         <h3 style="color: #d32f2f; margin-bottom: 15px;">🔮 Predictive Layoffs &amp; Closures</h3>
-        <div style="text-align: center; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <p style="color: #666; margin-bottom: 20px;">This section contains predictive analysis and requires password access.</p>
-            <button class="access-btn" onclick="showPredictiveLogin()">Access Predictions</button>
+        <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(211, 47, 47, 0.15); border: 1px solid #ffcdd2;">
+            <p style="color: #333; margin-bottom: 10px; font-size: 1.1em; font-weight: 500;">
+                📊 Exclusive Predictive Analysis Available
+            </p>
+            <p style="color: #666; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Get access to our curated predictions about potential layoffs and company closures based on market analysis, financial indicators, and industry trends.
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap;">
+                <div style="padding: 10px 20px; background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <span style="color: #d32f2f; font-weight: bold;">15+</span> Companies Analyzed
+                </div>
+                <div style="padding: 10px 20px; background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <span style="color: #ff9800; font-weight: bold;">Risk Levels</span> Assessed
+                </div>
+                <div style="padding: 10px 20px; background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <span style="color: #4CAF50; font-weight: bold;">Timeline</span> Predictions
+                </div>
+            </div>
+            <button class="access-btn" onclick="showPredictiveLogin()" style="padding: 12px 30px; font-size: 1.1em;">
+                🔓 Access Predictions
+            </button>
+            <p style="color: #999; margin-top: 15px; font-size: 0.85em;">
+                Password required • Updated regularly by our analysts
+            </p>
         </div>
     </div>
 
@@ -2965,9 +2986,12 @@
             const password = document.getElementById('predictivePassword').value;
 
             if (password === 'Added') {
+                // Hide the teaser/access section
+                document.getElementById('predictiveAccessSection').style.display = 'none';
+                // Show the actual predictions
                 document.getElementById('predictiveSection').style.display = 'block';
+                // Close the modal
                 document.getElementById('adminModal').style.display = 'none';
-                document.querySelector('.predictive-access-section').style.display = 'none';
                 clearAdminForms();
                 // Scroll to predictive section
                 document.getElementById('predictiveSection').scrollIntoView({ behavior: 'smooth' });
