@@ -1594,6 +1594,23 @@
             document.getElementById('newReason').value = '';
             clearLayoffForm();
             currentEditingId = null;
+
+            // Reset the heading if it was in edit mode
+            const formSection = document.getElementById('newCompany')?.closest('.admin-form');
+            if (formSection) {
+                const heading = formSection.previousElementSibling;
+                if (heading && heading.tagName === 'H4') {
+                    heading.textContent = 'Add Manual Prediction';
+                    heading.style.color = '';
+                }
+            }
+
+            // Reset the Add button if it was in edit mode
+            const addButton = document.querySelector('button[onclick="addPrediction()"]');
+            if (addButton) {
+                addButton.textContent = 'Add Manual Prediction';
+                addButton.style.backgroundColor = '';
+            }
         }
 
         function loadAdminPredictions() {
@@ -1661,7 +1678,8 @@
                         company,
                         risk,
                         timeline,
-                        reason
+                        reason,
+                        source: 'manual' // Ensure it stays manual after edit
                     };
                 }
                 currentEditingId = null;
@@ -1672,7 +1690,8 @@
                     company,
                     risk,
                     timeline,
-                    reason
+                    reason,
+                    source: 'manual'
                 });
             }
 
@@ -1683,6 +1702,7 @@
         function editPrediction(id) {
             const prediction = adminPredictions.find(p => p.id === id);
             if (prediction) {
+                // Fill the form fields
                 document.getElementById('newCompany').value = prediction.company;
                 document.getElementById('newRisk').value = prediction.risk;
                 document.getElementById('newTimeline').value = prediction.timeline;
@@ -1696,6 +1716,36 @@
                         adminPredictions[index].source = 'manual';
                         delete adminPredictions[index].riskScore;
                     }
+                }
+
+                // Scroll to the form and highlight it
+                const formSection = document.getElementById('newCompany').closest('.admin-form');
+                if (formSection) {
+                    // Add a visual indicator that we're in edit mode
+                    const heading = formSection.previousElementSibling;
+                    if (heading && heading.tagName === 'H4') {
+                        heading.textContent = `Edit Prediction - ${prediction.company}`;
+                        heading.style.color = '#ff9800';
+                    }
+
+                    // Scroll to the form
+                    formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // Highlight the form briefly
+                    formSection.style.backgroundColor = '#fff3e0';
+                    setTimeout(() => {
+                        formSection.style.backgroundColor = '';
+                    }, 2000);
+
+                    // Focus on the company field
+                    document.getElementById('newCompany').focus();
+                }
+
+                // Update the Add button text
+                const addButton = document.querySelector('button[onclick="addPrediction()"]');
+                if (addButton) {
+                    addButton.textContent = 'Update Prediction';
+                    addButton.style.backgroundColor = '#ff9800';
                 }
             }
         }
