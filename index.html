@@ -352,7 +352,8 @@
         <h1>Marketly</h1>
         <h2 style="margin-top: 10px; color: #666; font-weight: normal;">Tech Layoffs Tracker</h2>
         <button id="adminBtn" class="admin-btn" onclick="showAdminLogin()">Admin Login</button>
-    <p style="text-align: center; color: rgb(102, 102, 102); font-size: 0.9em;">Last updated: 2025-09-24</p></div>
+        <p id="lastUpdateDisplay" style="text-align: center; color: rgb(102, 102, 102); font-size: 0.9em;"></p>
+    </div>
 
 
     <!-- Predictive Section (Password Protected) -->
@@ -1948,12 +1949,10 @@
         // Initialize data
         function loadData() {
             // Update last updated info
-            const lastUpdated = document.createElement('p');
-            lastUpdated.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
-            lastUpdated.style.textAlign = 'center';
-            lastUpdated.style.color = '#666';
-            lastUpdated.style.fontSize = '0.9em';
-            document.querySelector('.header').appendChild(lastUpdated);
+            const lastUpdateDisplay = document.getElementById('lastUpdateDisplay');
+            if (lastUpdateDisplay) {
+                lastUpdateDisplay.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
+            }
 
             // Populate table with data
             populateTable();
@@ -2842,6 +2841,12 @@
             populateTable();
             loadAdminLayoffs();
 
+            // Update the last updated display
+            const lastUpdateDisplay = document.getElementById('lastUpdateDisplay');
+            if (lastUpdateDisplay) {
+                lastUpdateDisplay.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
+            }
+
             // Clear form
             clearLayoffForm();
 
@@ -2895,6 +2900,7 @@
                 // Update statistics
                 layoffsDataSource.totalLayoffs -= deletedLayoff.layoffs;
                 layoffsDataSource.totalCompanies -= 1;
+                layoffsDataSource.lastUpdated = new Date().toISOString().split('T')[0];
 
                 // Remove from array
                 layoffsDataSource.layoffs.splice(index, 1);
@@ -2903,6 +2909,12 @@
                 // Update displays
                 populateTable();
                 loadAdminLayoffs();
+
+                // Update the last updated display
+                const lastUpdateDisplay = document.getElementById('lastUpdateDisplay');
+                if (lastUpdateDisplay) {
+                    lastUpdateDisplay.textContent = `Last updated: ${layoffsDataSource.lastUpdated}`;
+                }
 
                 alert('Layoff entry deleted successfully');
             }
